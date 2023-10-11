@@ -2,8 +2,10 @@
 # Реализовать классы, наследующиеся от абстрактного класса,
 # для работы с конкретными платформами.
 # Классы должны уметь подключаться к API и получать вакансии.
+from src.vacancy import Vacancy
 from abc import ABC, abstractmethod
 import requests
+import json
 class JobSitesAPI(ABC):
     """Абстрактный класс для работы с вакансиями по API."""
     @abstractmethod # абстрактный метод connect
@@ -28,7 +30,7 @@ class HeadHunterAPI(JobSitesAPI): # Класс для HeadHunterAPI
 
 
     def connect(self):
-        """Реалиует подключение к API конкретной платформы."""
+        """Реалиует подключение к API hh.ru."""
         response = requests.get(   # Осуществляем запрос к API платформы
             self.url,
             headers=self.headers,
@@ -43,25 +45,68 @@ class HeadHunterAPI(JobSitesAPI): # Класс для HeadHunterAPI
 
 
     def get_jobs(self):
-        """Реализует получение информации о вакансии с платформы"""
-        response = self.connect() # Выполняем запрос методом self.connect(). Он возвращает response объект.
-        if response: # Производим проверку на None/False. Если response не пуст, то запрос прошел успешно.
-            return response.json() # десериализуем JSON ответ в python объекты командой json() и возвращаем их.
-        else: # Если response = None, то запрос не удался.
-            print("Запрос не удался, вакансии не получены") # выводим сооьщение что вакансии не были получены.
+        """Реализует получение информации о вакансии с hh.ru"""
+        response = self.connect()
+        if response:
+            data = response.json()
+            print(data)
+            # Обработка данных вакансий
+            # Например, добавляем вакансии в JSON-хранилище
+            for job in data['items']:
+                title = job.get('name')
+                location = job['area'].get('name')
+                url = job.get('alternate_url')
+                salary = job.get('salary')
+                description = job.get('snippet', {}).get('requirement') # требования
+                #self.storage.add_job(Vacancy(title, location, link, salary, description))
+
+            # Преобразование данных в JSON и сохранение в файл
+            json_data = json.dumps(data)
+            print(json_data)
+            with open('vacancies.json', 'w') as file:
+                file.write(json_data)
+        else:
+            print("Запрос не удался, вакансии не получены")
 
 
 class SuperJobAPI(JobSitesAPI): # Класс для SuperJobAPI
+    url = 'https://api.superjob.ru/2.0/vacancies/' # ссылка на api вакансий SJ.ru
+
+    def __init__(self, keyword):
+        self.params = {
+            "count": 30,
+            "page": None,
+            "keyword": keyword,
+            "archive": False
+
+        }
+        self.headers = {
+            "User-Agent": "PyCharm Scraper",  # Заголовок запроса к API SuperJob
+            "X-Api-App-Id": "v3.r.137882423.3f16d7b38ae40fcdf737015f09b7f73acd57de42.b234710085d1ec74c3252957807ea272da9d4432" # Secret key
+        }
 
 
     def connect(self):
-        # Реализация подключения к API конкретной платформы
-        pass
+        """Реализует подключение к API SuperJob."""
+        response = requests.get(
+            self.url,
+            headers=self.headers,
+            params=self.params
+        )
+        if response.ok:
+            return response
+        else:
+            print("Запрос не выполнен")
+        return response
 
 
     def get_jobs(self):
-        # Реализация получения вакансий с платформы
-        pass
+        """Реализует получение информации о вакансиях с платформы SuperJob."""
+        response = self.connect()
+        if response:
+            return response.json()
+        else:
+            print("Запрос не удался, вакансии не получены")
 
 
 
