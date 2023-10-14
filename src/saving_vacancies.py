@@ -8,12 +8,12 @@ import json
 from abc import ABC, abstractmethod
 class JobStorage(ABC):
     @abstractmethod
-    def add_job(self, job):
+    def add_vacancy(self, vacancy):
         """Абстрактный метод для добавления вакансии в хранилище"""
         pass
 
     @abstractmethod
-    def get_jobs(self, criteria):
+    def get_vacancies(self, criteria):
         """
         Абстрактный метод для получения списка вакансий из хранилища,
         соответствующих указанным критериям.
@@ -21,64 +21,36 @@ class JobStorage(ABC):
 
 
     @abstractmethod
-    def delete_job(self, job):
+    def  delete_vacancy(self, vacancy_id):
         """Абстрактный метод для удаления вакансии из хранилища"""
         pass
 
 
-class JSONJobStorage(JobStorage):
-    def __init__(self, file_path):
+class JSONVacancyStorage(JobStorage):
+    def __init__(self, file_path): # путь к  файлу в который передаем вакансии для хранения например save_job.json
         self.file_path = file_path
 
-    def add_job(self, job):
-        """Метод для добавления вакансии в JSON-файл хранилища."""
-        job_data = {
-            'title': job.title,
-            'location': job.location,
-            'link': job.link,
-            'salary': job.salary,
-            'description': job.description
-        }
-        with open(self.file_path, 'a') as file:
-            json.dump(job_data, file)
-            file.write('\n')
+    def add_vacancy(self, vacancy):
+        with open(self.file_path, 'w', encoding='UTF-8') as json_file:
+            json.dump(vacancy, json_file, ensure_ascii=False, indent=2)
+            json_file.write('\n')
 
-    def get_jobs(self, criteria):
-        """Метод для получения списка вакансий из JSON-файла хранилища,
-        соответствующих указанным критериям.
-        """
-        jobs = []
+
+
+    def get_vacancies(self, criteria):
+        result = []
         with open(self.file_path, 'r') as file:
             for line in file:
-                job_data = json.loads(line)
-                job = Job(
-                    job_data['title'],
-                    job_data['location'],
-                    job_data['link'],
-                    job_data['salary'],
-                    job_data['description']
-                )
-                if self._matches_criteria(job, criteria):
-                    jobs.append(job)
-        return jobs
+                vacancy = json.loads(line)
+                if criteria in vacancy:
+                    result.append(vacancy)
+        return result
 
-    def delete_job(self, job):
-        """Метод для удаления вакансии из JSON-файла хранилища."""
-        lines = []
+    def delete_vacancy(self, vacancy_id):
         with open(self.file_path, 'r') as file:
-            for line in file:
-                job_data = json.loads(line)
-                existing_job = Job(
-                    job_data['title'],
-                    job_data['link'],
-                    job_data['salary'],
-                    job_data['description']
-                )
-                if existing_job != job:
-                    lines.append(line)
+            lines = file.readlines()
         with open(self.file_path, 'w') as file:
-            file.writelines(lines)
-
-    def _matches_criteria(self, job, criteria):
-        """Метод для реализации логики сравнения данных вакансии с критериями."""
-        pass
+            for line in lines:
+                vacancy = json.loads(line)
+                if vacancy.get('id') != vacancy_id:
+                    file.write(line)
