@@ -43,28 +43,37 @@ class HeadHunterAPI(JobSitesAPI): # Класс для HeadHunterAPI
 
         return response # Но всё равно возвращаем response
 
-
     def get_jobs(self):
-        """Реализует получение информации о вакансии с hh.ru"""
+        """Реализует получение информации о вакансиях с hh.ru"""
         response = self.connect()
         if response:
             data = response.json()
             print(data)
-            # Обработка данных вакансий
-            # Например, добавляем вакансии в JSON-хранилище
+
+            jobs_list = []
             for job in data['items']:
                 title = job.get('name')
                 location = job['area'].get('name')
                 url = job.get('alternate_url')
-                salary = job.get('salary')
-                description = job.get('snippet', {}).get('requirement') # требования
-                #self.storage.add_job(Vacancy(title, location, link, salary, description))
+                salary_from = job['salary'].get('from') if job['salary'] is not None else None
+                salary_to = job['salary'].get('to') if job['salary'] is not None else None
+                currency = job['salary'].get('currency') if job['salary'] is not None else None
+                description = job.get('snippet', {}).get('requirement')
 
-            # Преобразование данных в JSON и сохранение в файл
-            json_data = json.dumps(data)
-            print(json_data)
-            with open('vacancies.json', 'w') as file:
-                file.write(json_data)
+                job_dict = {
+                    'title': title,
+                    'location': location,
+                    'url': url,
+                    'salary_from': salary_from,
+                    'salary_to': salary_to,
+                    'currency': currency,
+                    'description': description
+                }
+                jobs_list.append(job_dict)
+            print(jobs_list)
+            final_dict = {
+                'HH': jobs_list}
+            return final_dict # возвращаем список словарей с нужными параметрами вакансий
         else:
             print("Запрос не удался, вакансии не получены")
 
@@ -104,7 +113,35 @@ class SuperJobAPI(JobSitesAPI): # Класс для SuperJobAPI
         """Реализует получение информации о вакансиях с платформы SuperJob."""
         response = self.connect()
         if response:
-            return response.json()
+            data = response.json()
+
+
+            jobs_list = []
+            for job in data['objects']:
+                title = job.get('profession')
+                location = job['town'].get('title')
+                url = job.get('link')
+                salary_from = job.get('payment_from')
+                salary_to = job.get('payment_to')
+                currency = job.get('currency')
+                description = job.get('candidat')
+
+                job_dict = {
+                    'title': title,
+                    'location': location,
+                    'url': url,
+                    'salary_from': salary_from,
+                    'salary_to': salary_to,
+                    'currency': currency,
+                    'description': description
+                }
+                jobs_list.append(job_dict)
+            print(jobs_list)
+            final_dict = {
+                'SJ': jobs_list}
+            print(final_dict)
+            return final_dict  # возвращаем список словарей с нужными параметрами вакансий
+
         else:
             print("Запрос не удался, вакансии не получены")
 
