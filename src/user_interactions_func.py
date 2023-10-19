@@ -6,3 +6,23 @@
 # получить топ-N вакансий по зарплате, получить вакансии в отсортированном виде,
 # получить вакансии, в описании которых есть определенные ключевые слова, например postgres, и т. п.
 
+from src.class_api import HeadHunterAPI, SuperJobAPI
+from src.saving_vacancies import JSONVacancyStorage
+from func import selects_platform, searches_criteria, sort_vacancy
+
+def user_interaction():
+    """Функция для взаимодействия с пользователем"""
+    print('Привет! Данная программа производит поиск вакансий на платформах hh.ru и superjob.ru')
+    selects_platform() # Выбор платформы, загружает вакансии в json
+    searches_criteria() # Выбор региона поиска
+    sort_vacancy()
+
+
+
+
+
+
+    #top_n = int(input("Введите количество вакансий для вывода в топ N по зарплате: "))
+
+
+user_interaction()
