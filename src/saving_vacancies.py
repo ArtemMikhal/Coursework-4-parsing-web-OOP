@@ -35,22 +35,43 @@ class JSONVacancyStorage(JobStorage):
             json.dump(vacancy, json_file, ensure_ascii=False, indent=2)
             json_file.write('\n')
 
-
-
     def get_vacancies(self, criteria):
         result = []
-        with open(self.file_path, 'r') as file:
-            for line in file:
-                vacancy = json.loads(line)
-                if criteria in vacancy:
-                    result.append(vacancy)
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+
+            vacancies = json.load(file)
+            for vacancy in vacancies:
+                for value in vacancy.values():
+                    if criteria in str(value):
+                        result.append(vacancy)
+        with open(self.file_path, 'w', encoding='UTF-8') as json_file:
+            json.dump(result, json_file, ensure_ascii=False, indent=2)
+            json_file.write('\n')
+
         return result
 
-    def delete_vacancy(self, vacancy_id):
-        with open(self.file_path, 'r') as file:
-            lines = file.readlines()
-        with open(self.file_path, 'w') as file:
-            for line in lines:
-                vacancy = json.loads(line)
-                if vacancy.get('id') != vacancy_id:
-                    file.write(line)
+    def delete_vacancy(self, criteria):
+        with open(self.filename) as f:
+            data = json.load(f)
+
+        for vacancy in data:
+            # Сравниваем непосредственно в цикле
+            if vacancy != criteria:
+                data.remove(vacancy)
+
+        with open(self.filename, 'w') as f:
+            json.dump(data, f)
+
+    def load_vacancy(self):
+        #Загр json файл  и возвр список словарей
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            vacancies = json.load(file)
+            return vacancies
+
+
+    def len_vacancy(self):
+        """Считает количество вакансий"""
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            vacancies = json.load(file)
+        count = len(vacancies)
+        return count
