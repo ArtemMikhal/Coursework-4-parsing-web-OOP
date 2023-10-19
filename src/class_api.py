@@ -48,7 +48,7 @@ class HeadHunterAPI(JobSitesAPI): # Класс для HeadHunterAPI
         response = self.connect()
         if response:
             data = response.json()
-            print(data)
+
 
             jobs_list = []
             for job in data['items']:
@@ -61,19 +61,18 @@ class HeadHunterAPI(JobSitesAPI): # Класс для HeadHunterAPI
                 description = job.get('snippet', {}).get('requirement')
 
                 job_dict = {
-                    'title': title,
-                    'location': location,
-                    'url': url,
-                    'salary_from': salary_from,
-                    'salary_to': salary_to,
-                    'currency': currency,
-                    'description': description
+                    "title": title,
+                    "location": location,
+                    "url": url,
+                    "salary_from": salary_from,
+                    "salary_to": salary_to,
+                    "currency": currency,
+                    "description": description
                 }
                 jobs_list.append(job_dict)
-            print(jobs_list)
-            final_dict = {
-                'HH': jobs_list}
-            return final_dict # возвращаем список словарей с нужными параметрами вакансий
+
+
+            return jobs_list # возвращаем список словарей с нужными параметрами вакансий
         else:
             print("Запрос не удался, вакансии не получены")
 
@@ -127,20 +126,19 @@ class SuperJobAPI(JobSitesAPI): # Класс для SuperJobAPI
                 description = job.get('candidat')
 
                 job_dict = {
-                    'title': title,
-                    'location': location,
-                    'url': url,
-                    'salary_from': salary_from,
-                    'salary_to': salary_to,
-                    'currency': currency,
-                    'description': description
+                    "title": title,
+                    "location": location,
+                    "url": url,
+                    "salary_from": salary_from,
+                    "salary_to": salary_to,
+                    "currency": currency,
+                    "description": description
                 }
                 jobs_list.append(job_dict)
-            print(jobs_list)
-            final_dict = {
-                'SJ': jobs_list}
-            print(final_dict)
-            return final_dict  # возвращаем список словарей с нужными параметрами вакансий
+
+
+
+            return jobs_list  # возвращаем список словарей с нужными параметрами вакансий
 
         else:
             print("Запрос не удался, вакансии не получены")
